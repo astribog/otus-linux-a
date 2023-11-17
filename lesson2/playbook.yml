@@ -1,0 +1,26 @@
+---
+- name: Install and configure nginx
+  hosts: frontend
+  become: true
+  tasks:
+    - name: Install nginx package 
+      ansible.builtin.apt:
+        name:
+          - "{{ item }}"
+        state: latest
+        update_cache: yes
+      with_items:
+        - nginx
+      notify:
+        - restart nginx
+  
+  handlers:
+    - name: restart nginx
+      systemd:
+        name: nginx
+        state: restarted
+        enabled: yes
+    
+  
+
+  
