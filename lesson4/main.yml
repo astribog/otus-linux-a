@@ -1,0 +1,48 @@
+---
+- name: Target prepare
+  hosts: tgt1
+  become: true
+  tags:
+   - step1
+  roles:
+   - { role: 'OndrejHome.targetcli' }
+  vars:
+    iscsi_targets:
+      - wwn: "iqn.1994-05.com.redhat:target"
+        disks:
+          - path: /dev/vdb
+            name: disk1
+            type: block
+        initiators:
+          - 'iqn.1994-05.com.redhat:pcs1'
+          - 'iqn.1994-05.com.redhat:pcs2'
+          - 'iqn.1994-05.com.redhat:pcs3'
+
+- name: Initiators prepare
+  hosts: pcs_servers
+  become: true
+  tags:
+   - step1
+  roles: 
+   - { role: 'OndrejHome.iscsiadm', custom_iscsi_initiator_name: 'iqn.1994-05.com.redhat:{{ inventory_hostname_short }}', iscsi_target_ip: '192.168.10.10' }
+ 
+- name: Cluster prepare
+  hosts: pcs_servers
+  become: true
+  tags:
+   - step1
+  roles:
+   - base_config
+
+
+- name: Cluster config step 1
+  hosts: pcs1
+  become: true
+  tags:
+   - step2
+  roles:
+   - pcs_config1
+
+
+
+...
