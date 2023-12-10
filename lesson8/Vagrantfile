@@ -1,0 +1,61 @@
+# -*- mode: ruby -*-
+# vim: set ft=ruby :
+
+MACHINES = {
+    :nginx1 => {
+            :box_name => "ubuntu/focal64",
+            :vm_name => "nginx1", 
+            :ip_addr => '192.168.56.141',
+            :mem => 1024,
+            :cpu => 2,
+},
+    :nginx2 => {
+            :box_name => "ubuntu/focal64",
+            :vm_name => "nginx2", 
+            :ip_addr => '192.168.56.142',
+            :mem => 1024,
+            :cpu => 2,
+},
+    :nginx3 => {
+        :box_name => "ubuntu/focal64",
+        :vm_name => "nginx3", 
+        :ip_addr => '192.168.56.143',
+        :mem => 1024,
+        :cpu => 2,
+    },
+    :nginx4 => {
+        :box_name => "ubuntu/focal64",
+        :vm_name => "nginx4", 
+        :ip_addr => '192.168.56.144',
+        :mem => 1024,
+        :cpu => 2,
+    },
+    :sql1 => {
+            :box_name => "ubuntu/focal64",
+            :vm_name => "sql1", 
+            :ip_addr => '192.168.56.150',
+            :mem => 1024,
+            :cpu => 2,
+    },
+}
+ 
+Vagrant.configure("2") do |config|
+    MACHINES.each do |boxname, boxconfig|
+        config.vm.define boxname do |box|
+            box.vm.provider "virtualbox" do |vb|
+                vb.customize ["modifyvm", :id, "--memory", boxconfig[:mem]]
+            end
+            box.vm.box = boxconfig[:box_name]
+            box.vm.host_name = boxconfig[:vm_name]
+            box.vm.network "private_network", ip: boxconfig[:ip_addr]
+            if boxconfig[:vm_name] == "sql1"
+                box.vm.provision "ansible" do |ansible|
+                    ansible.playbook = "main.yml"
+                    ansible.inventory_path = "inventory/hosts"
+                    ansible.host_key_checking = "false"
+                    ansible.limit = "all"
+                end
+            end
+        end
+    end
+end
