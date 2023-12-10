@@ -1,0 +1,24 @@
+---
+
+- name: Install the nginx packages 
+  ansible.builtin.apt:
+    name:
+      - "{{ item }}"
+    state: latest
+    update_cache: yes
+  with_items:
+    - nginx
+
+- name: Copy nginx conf
+  tags: nginx1
+  copy:
+    src: nginx.conf
+    dest: /etc/nginx/nginx.conf  
+      
+- name: Restart the nginx service
+  tags: nginx1
+  service:
+    name: "nginx"
+    state: restarted
+    enabled: yes
+
