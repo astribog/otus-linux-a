@@ -1,0 +1,13 @@
+---
+- name: Install and configure Percona XDB cluster
+  hosts: all
+  gather_facts: true
+  become: true
+  tags: xdb
+  roles:
+    - role: xdb-cluster
+      xtradb_bind_interface: enp0s8
+      
+      
+
+

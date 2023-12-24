@@ -1,0 +1,4 @@
+[xtradb-cluster-nodes]
+xdb1 ansible_host=192.168.56.191 ansible_port=22 ansible_private_key_file=.vagrant/machines/xdb1/virtualbox/private_key server_id=1
+xdb2 ansible_host=192.168.56.192 ansible_port=22 ansible_private_key_file=.vagrant/machines/xdb2/virtualbox/private_key server_id=2
+xdb3 ansible_host=192.168.56.193 ansible_port=22 ansible_private_key_file=.vagrant/machines/xdb3/virtualbox/private_key server_id=3
