@@ -1,0 +1,52 @@
+---
+
+- name: Install the nginx packages 
+  ansible.builtin.apt:
+    name:
+      - "{{ item }}"
+    state: latest
+    update_cache: yes
+  with_items:
+    - nginx
+    - keepalived
+  
+- name: Copy master keepalived confs
+  tags: n1
+  copy:
+    src: keepalived_master_nginx.conf
+    dest: /etc/keepalived/keepalived.conf
+    owner: root
+    group: root
+    mode: 0644
+  when: (ansible_hostname == "nginx1")
+
+- name: Copy slave keepalived confs
+  tags: n1
+  copy:
+    src: keepalived_slave_nginx.conf
+    dest: /etc/keepalived/keepalived.conf
+    owner: root
+    group: root
+    mode: 0644
+  when: (ansible_hostname == "nginx2")
+  
+- name: Copy nginx conf
+  tags: nginx1
+  copy:
+    src: nginx.conf
+    dest: /etc/nginx/nginx.conf  
+
+- name: Restart keepalived service
+  tags: n1
+  service:
+    name: "keepalived"
+    state: restarted
+    enabled: yes
+
+- name: Restart the nginx service
+  tags: nginx1
+  service:
+    name: "nginx"
+    state: restarted
+    enabled: yes
+

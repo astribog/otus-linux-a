@@ -1,0 +1,5 @@
+- hosts: fluentbit
+  become: true
+  become_user: root
+  roles:
+    - fluent-bit

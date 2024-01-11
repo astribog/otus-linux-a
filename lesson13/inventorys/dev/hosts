@@ -1,0 +1,37 @@
+# List all the nodes in the os cluster
+[sql_backend]
+sql1 ansible_host=192.168.56.150 ansible_port=22 ansible_private_key_file=.vagrant/machines/sql1/virtualbox/private_key server_id=1 
+
+[nginx_backend]
+nginx3 ansible_host=192.168.56.143 ansible_port=22 ansible_private_key_file=.vagrant/machines/nginx3/virtualbox/private_key 
+nginx4 ansible_host=192.168.56.144 ansible_port=22 ansible_private_key_file=.vagrant/machines/nginx4/virtualbox/private_key 
+
+[nginx_frontend]
+nginx1 ansible_host=192.168.56.141 ansible_port=22 ansible_private_key_file=.vagrant/machines/nginx1/virtualbox/private_key 
+nginx2 ansible_host=192.168.56.142 ansible_port=22 ansible_private_key_file=.vagrant/machines/nginx2/virtualbox/private_key 
+
+[fluentbit:children]
+nginx_backend
+nginx_frontend
+
+[os-cluster]
+192.168.56.121 ansible_private_key_file=.vagrant/machines/elk1/virtualbox/private_key roles=data,master attr=hot
+192.168.56.122 ansible_private_key_file=.vagrant/machines/elk2/virtualbox/private_key roles=data,ingest attr=warm
+192.168.56.123 ansible_private_key_file=.vagrant/machines/elk3/virtualbox/private_key roles=data,ingest attr=cold
+
+
+# List all the Master eligible nodes under this group
+[master]
+elk1
+
+[dashboards]
+elk3
+
+
+
+[all:vars]
+env=dev
+
+ansible_user=vagrant
+ansible_ssh_common_args=' -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'
+ansible_ssh_extra_args="-R3128:localhost:3128"

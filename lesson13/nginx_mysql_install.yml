@@ -1,0 +1,24 @@
+---
+- name: Install and configure MySQL 
+  tags: sql
+  become: true
+  hosts: sql_backend
+  roles:
+    - mysql
+     
+- name: Install and configure Backends   
+  tags: back
+  become: true
+  hosts: nginx_backend
+  roles:
+    - nginx_backend
+
+- name: Install and configure Nginx balancer + VIP 
+  tags: front
+  become: true
+  hosts: nginx_frontend
+  roles:
+    - nginx_frontend
+
+
+   
