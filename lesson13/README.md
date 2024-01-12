@@ -27,7 +27,8 @@ asible-playbook fluent_bit_install.yml -i ./inventorys/dev
 ```
 
 ##### Комментарии:
-  
+  За основу взят плэйбук домашнего задания: https://github.com/astribog/otus-linux-a/tree/master/lesson8
+    И https://github.com/hamnsk/common-playbooks/tree/main ,  адаптированный под Vagrant и nginx (2 сетевых адаптера, access.log)
   Адреса для плэйбука nginx_mysql_install.yml захардкожены в [hosts](inventorys/dev/hosts), [keepalived.conf](roles/nginx_frontend/files/keepalived_master_nginx.conf) и соответствуют следующей таблице:
 
 | IP адрес        | Имя машины        | Коммент      |
