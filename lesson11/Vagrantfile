@@ -1,0 +1,55 @@
+# -*- mode: ruby -*-
+# vim: set ft=ruby :
+
+MACHINES = {
+    :xdb1 => {
+            :box_name => "ubuntu/focal64",
+            :vm_name => "xdb1", 
+            :ip_addr => '192.168.56.191',
+            :mem => 1024,
+            :cpu => 2,
+},
+    :xdb2 => {
+            :box_name => "ubuntu/focal64",
+            :vm_name => "xdb2", 
+            :ip_addr => '192.168.56.192',
+            :mem => 1024,
+            :cpu => 2,
+},
+    :xdb3 => {
+        :box_name => "ubuntu/focal64",
+        :vm_name => "xdb3", 
+        :ip_addr => '192.168.56.193',
+        :mem => 1024,
+        :cpu => 2,
+    },
+    :nginx1 => {
+        :box_name => "ubuntu/focal64",
+        :vm_name => "nginx1", 
+        :ip_addr => '192.168.56.194',
+        :mem => 1024,
+        :cpu => 2,
+    },
+}
+ 
+Vagrant.configure("2") do |config|
+    MACHINES.each do |boxname, boxconfig|
+        config.vm.define boxname do |box|
+            box.vm.provider "virtualbox" do |vb|
+                vb.customize ["modifyvm", :id, "--memory", boxconfig[:mem]]
+            end
+            box.vm.box = boxconfig[:box_name]
+            box.vm.host_name = boxconfig[:vm_name]
+            box.vm.network "private_network", ip: boxconfig[:ip_addr]
+            if boxconfig[:vm_name] == "nginx1"
+                box.vm.provision "ansible" do |ansible|
+                    ansible.playbook = "deploy_pgcluster.yml"
+                    ansible.inventory_path = "inventory"
+                    ansible.host_key_checking = "false"
+                    ansible.limit = "all"
+                end
+            end
+
+        end
+    end
+end

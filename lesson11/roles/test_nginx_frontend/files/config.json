@@ -1,0 +1,17 @@
+{
+    "server": false,
+    "datacenter": "dc1",
+    "node_name": "nginx1",
+    "data_dir": "/var/lib/consul",
+    "bind_addr": "192.168.56.194",
+    "client_addr": "0.0.0.0",
+    "retry_join": ["192.168.56.191", "192.168.56.192", "192.168.56.193"],
+    "encrypt": "/5A3qrYcQ3pfRhCKKD72DzewDBdj3c5DMh9bvxGgfDU=",
+    "log_level": "warn",
+    "enable_local_script_checks": true,
+    "enable_script_checks": true, 
+    "enable_syslog": true,
+    "ui_config": {
+          "enabled": true
+    }
+  }

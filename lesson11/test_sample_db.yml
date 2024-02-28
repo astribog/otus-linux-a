@@ -1,0 +1,14 @@
+---
+
+     
+- name: Create and restore sample db 
+  tags: postgresql_databases
+  become: true
+  become_user: postgres
+  hosts: 192.168.56.191
+  roles:
+    - test_sample_db
+
+
+
+   

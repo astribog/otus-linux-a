@@ -1,0 +1,153 @@
+---
+
+- name: Install packages
+  tags: nginx1 
+  ansible.builtin.apt:
+    name:
+      - "{{ item }}"
+    state: latest
+    update_cache: yes
+  with_items:
+    - nginx
+    - php-fpm
+    - php-pgsql
+    - dnsmasq
+    - unzip
+
+- name: Unzip Consul Agent
+  tags: agent
+  ansible.builtin.unarchive:
+    src: consul_1.15.8_linux_amd64.zip
+    dest: /usr/bin
+
+- name: Make domain dir
+  tags: nginx1
+  file:
+    path: /var/www/dvdrental
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: Copy ssl key 
+  tags: nginx1
+  copy:
+    src: nginx-selfsigned.key
+    dest: /etc/ssl/private/nginx-selfsigned.key
+
+- name: Copy ssl cert
+  tags: nginx1 
+  copy:
+    src: nginx-selfsigned.crt
+    dest: /etc/ssl/certs/nginx-selfsigned.crt
+
+- name: Copy ssl pem
+  tags: nginx1
+  copy:
+    src: dhparam.pem
+    dest: /etc/nginx/dhparam.pem
+
+- name: Copy ssl conf
+  tags: nginx1
+  copy:
+    src: self-signed.conf
+    dest: /etc/nginx/snippets/self-signed.conf 
+
+- name: Copy ssl params conf
+  tags: nginx1
+  copy:
+    src: ssl-params.conf
+    dest: /etc/nginx/snippets/ssl-params.conf  
+
+- name: Copy domain config
+  tags: nginx1
+  copy:
+    src: dvdrental
+    dest: /etc/nginx/sites-available/dvdrental     
+  
+- name: Soft link dvdrental domain config
+  tags: nginx1
+  shell: "ln -s /etc/nginx/sites-available/dvdrental /etc/nginx/sites-enabled/"
+
+- name: Copy  php dir
+  tags: nginx1
+  copy:
+    src: postgresqlphpconnect
+    dest: /var/www/dvdrental/    
+
+- name: Restart the nginx & php services
+  tags: nginx1
+  service:
+    name:  "{{ item }}"
+    state: restarted
+    enabled: yes
+  with_items:
+    - nginx
+    - php7.4-fpm
+
+- name: Add group `consul`
+  ansible.builtin.group:
+    name: consul
+    state: present
+    
+- name: Add user `consul`
+  ansible.builtin.user:
+    name: consul
+    groups: consul
+    comment: Consul Agent
+    system: true
+
+- name: Create /var/lib/consul
+  ansible.builtin.file:
+    path: /var/lib/consul
+    state: directory
+    owner: consul
+    group: consul
+    mode: "0755"
+
+- name: Create /etc/consul.d
+  ansible.builtin.file:
+    path: /etc/consul.d
+    state: directory
+    owner: consul
+    group: consul
+    mode: "0755"
+
+- name: Copy Consul config files
+  ansible.builtin.copy:
+    src: "{{ item }}"
+    dest: /etc/consul.d/
+  loop:
+    - config.json
+    - web.json
+
+- name: Copy Consul systed unit
+  ansible.builtin.copy:
+    src: consul.service
+    dest: /etc/systemd/system/consul.service
+
+- name: Enable and start Consul service
+  ansible.builtin.systemd_service:
+    name: consul
+    state: started
+    enabled: true
+
+- name: Disable systemd-resolved
+  tags: dnsmasq
+  ansible.builtin.systemd_service:
+    name: systemd-resolved
+    state: stopped
+    enabled: false
+
+- name: Copy dnsmasq config
+  tags: dnsmasq
+  ansible.builtin.copy:
+    src: dnsmasq/consul
+    dest: /etc/dnsmasq.d/consul
+
+- name: Enable and start dnsmasq service
+  tags: dnsmasq1
+  ansible.builtin.systemd_service:
+    name: dnsmasq
+    state: started
+    enabled: true

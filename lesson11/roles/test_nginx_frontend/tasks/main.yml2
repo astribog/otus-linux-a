@@ -1,0 +1,78 @@
+---
+
+- name: Install unzip 
+  ansible.builtin.apt:
+    name:
+      - "{{ item }}"
+    state: latest
+    update_cache: yes
+  with_items:
+    - unzip
+
+- name: Unzip Consul Agent
+  tags: agent
+  ansible.builtin.unarchive:
+    src: consul_1.15.8_linux_amd64.zip
+    dest: /usr/bin
+
+- name: Install the nginx packages
+  tags: nginx1 
+  ansible.builtin.apt:
+    name:
+      - "{{ item }}"
+    state: latest
+    update_cache: yes
+  with_items:
+    - nginx
+
+- name: Restart the nginx service
+  tags: nginx1
+  service:
+    name: "nginx"
+    state: restarted
+    enabled: yes
+
+
+- name: Add group `consul`
+  ansible.builtin.group:
+    name: consul
+    state: present
+    
+- name: Add user `consul`
+  ansible.builtin.user:
+    name: consul
+    groups: consul
+    comment: Consul Agent
+    system: true
+
+- name: Create Consul dirs
+  ansible.builtin.file:
+    path:
+      - "{{ item }}"
+    state: directory
+    owner: consul
+    group: consul
+    mode: "0755"
+  loop:
+    - /var/lib/consul
+    - /etc/consul.d
+
+- name: Copy Consul config files
+  ansible.builtin.copy:
+    src: "{{ item }}"
+    dest: /etc/consul.d/
+  loop:
+    - config.json
+    - web.json
+
+- name: Copy Consul systed unit
+  ansible.builtin.copy:
+    src: consul.service
+    dest: /etc/systemd/system/consul.service
+
+- name: Enable and start Consul service
+  ansible.builtin.systemd_service:
+    name: consul
+    state: started
+    enabled: true
+

@@ -1,0 +1,61 @@
+---
+
+- name: Copy Consul Agent
+  hosts: nginx1
+  tags: agent
+  copy:
+    src: consul_1.15.8_linux_amd64.zip
+    dest: ~
+
+- name: Unzip Consul Agent
+  hosts: nginx1
+  tags: agent
+  ansible.builtin.unarchive:
+    src: consul_1.15.8_linux_amd64.zip
+    dest: /usr/bin
+
+
+
+- name: Install the nginx packages 
+  ansible.builtin.apt:
+    name:
+      - "{{ item }}"
+    state: latest
+    update_cache: yes
+  with_items:
+    - nginx
+    - php-fpm
+    - php-mysql
+    
+  
+- name: Make domain dir
+  file:
+    path: /var/www/bets
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+
+
+- name: Copy bets domain config
+  copy:
+    src: bets
+    dest: /etc/nginx/sites-available/bets     
+  
+- name: Soft link bets domain config
+  tags: nginx
+  shell: "ln -s /etc/nginx/sites-available/bets /etc/nginx/sites-enabled/"
+
+- name: Copy bets php
+  tags: nginx1
+  copy:
+    src: bets.php
+    dest: /var/www/bets/bets.php    
+      
+- name: Restart the nginx service
+  tags: nginx1
+  service:
+    name: "nginx"
+    state: restarted
+    enabled: yes
+

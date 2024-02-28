@@ -1,0 +1,13 @@
+---
+
+     
+- name: Install and configure Frontend   
+  tags: back
+  become: true
+  hosts: nginx_frontend
+  roles:
+    - test_nginx_frontend
+
+
+
+   
