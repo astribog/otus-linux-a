@@ -20,6 +20,9 @@
 ### Порядок запуска:
 ```
 git clone <this repo>
+Скачать consul_1.15.8_linux_amd64.zip и положить в:
+  roles/consul/files
+  roles/test_nginx_frontend/files
 ansible-galaxy install -r roles/consul/requirements.yml
 vagrant up - поднимется PostgreSQL High-Availability Cluster на базе Patroni и Consul
 ansible-playbook test_sample_db.yml - развернется тестовая база 
